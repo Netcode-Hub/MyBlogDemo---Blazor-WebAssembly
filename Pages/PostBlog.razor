@@ -1,0 +1,53 @@
+﻿@page "/postblog/{url}"
+@using MyBlogDemo.Client.Services;
+@using MyBlogDemo.Shared;
+@*@using Markdig*@
+@inject IBlogService blogService
+<div class="row">
+    @if (CurrentPost != null)
+    {
+            <table class="table">
+                <thead></thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img src="@CurrentPost.Image" style="width:250px; height:250px; border:hidden" class="border-0" />
+                        </td>
+                        <td>
+                            <p>
+                                <span class="h4 text-primary fw-bold">@CurrentPost.Title</span> <br />
+                                <span class="text-end" style="text-align:right"><i>Posted on: @CurrentPost.DateCreated.ToString("d")</i></span>
+                                &nbsp; <b>Author:</b> <i>@CurrentPost.Author</i>
+                            </p>
+                            <span class="text-muted">@CurrentPost.Description</span><br />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <p>@CurrentPost.Content</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+    }
+    else
+    {
+            <div class="badge text-center">Please Wait...</div>
+    }
+    <div class="mt-2">
+        <a href="/" class="btn btn-primary float-end"> Return</a>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public string url { get; set; }
+
+    private BlogPost CurrentPost = new BlogPost();
+
+    protected override async Task OnInitializedAsync()
+    {
+        CurrentPost = await blogService.GetBlogPostUrl(url);
+    }
+}

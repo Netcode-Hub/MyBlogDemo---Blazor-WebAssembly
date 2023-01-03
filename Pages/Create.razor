@@ -1,0 +1,83 @@
+﻿@page "/create"
+@using Markdig
+@using MyBlogDemo.Shared;
+@inject MyBlogDemo.Client.Services.IBlogService blogService
+@inject NavigationManager NavigationManager;
+<div class="row">
+    <div class="col-md-6 offset-3">
+        <h3>Create a New Blog</h3>
+        <EditForm Model="@newBlogPost" OnValidSubmit="CreateNewBlogPost">
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+            <ValidationSummary class="form-control p-3"></ValidationSummary>
+            <div class="form-group mt-2">
+                <label class="form-label" for="title">Title</label>
+                <InputText id="title" @bind-Value="newBlogPost.Title" class="form-control"></InputText>
+                <ValidationMessage For="@(()=> newBlogPost.Title)"></ValidationMessage>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="url">Url</label>
+                <InputText id="url" @bind-Value="newBlogPost.Url" class="form-control"></InputText>
+                <ValidationMessage For="@(()=> newBlogPost.Url)"></ValidationMessage>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="content">Content</label>
+                <BlogTextArea id="content" @bind-Value="newBlogPost.Content" class="form-control"></BlogTextArea>
+               @* <InputTextArea id="content" @bind-Value="newBlogPost.Content" class="form-control"></InputTextArea>*@
+                <ValidationMessage For="@(()=> newBlogPost.Content)"></ValidationMessage>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="previewContent">Content Preview</label>
+                <div id="previewContent" style="height:100%" class="form-control">@((MarkupString)Markdown.ToHtml(@newBlogPost.Content))</div>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="description">Description</label>
+                <InputTextArea id="description" @bind-Value="newBlogPost.Description" class="form-control"></InputTextArea>
+                <ValidationMessage For="@(()=> newBlogPost.Description)"></ValidationMessage>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="author">Author</label>
+                <InputText id="author" @bind-Value="newBlogPost.Author" class="form-control"></InputText>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="image">Images</label>
+                <InputFile id="image" OnChange="OnFileChange" class="form-control"></InputFile>
+            </div>
+            <div class="form-group mt-2">
+                <label class="form-label" for="dateCreated">Date Created</label>
+                <InputDate id="dateCreated" @bind-Value="newBlogPost.DateCreated" class="form-control"></InputDate>
+            </div>
+            <div class="form-check mt-2">
+                <InputCheckbox id="isPublished" @bind-Value="newBlogPost.IsPublished" class="form-check"></InputCheckbox>
+                <label class="form-label" for="isPublished">Publish</label>
+            </div>
+            <div class="form-check mt-2">
+                <button type="submit" class="btn btn-primary"> <i class="oi oi-plus"></i> Create</button>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+
+@code {
+    public BlogPost newBlogPost = new BlogPost();
+
+    async void CreateNewBlogPost()
+    {
+        var result = await blogService.CreateNewBlogPost(newBlogPost);
+        NavigationManager.NavigateTo($"postblog/{result.Url}");
+        //Console.WriteLine("Create that blog post");
+    }
+
+     async Task OnFileChange(InputFileChangeEventArgs e)
+    {
+
+        var format = "image/png";
+        var resizeImage = await e.File.RequestImageFileAsync(format, 300, 300);
+        var buffer = new byte[resizeImage.Size];
+        await resizeImage.OpenReadStream().ReadAsync(buffer);
+        var imageData = $"data:{format};base64,{Convert.ToBase64String(buffer)}";
+        newBlogPost.Image = imageData;
+
+       // Console.WriteLine(newBlogPost.Image);
+    }
+}

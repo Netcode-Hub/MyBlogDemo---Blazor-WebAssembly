@@ -1,0 +1,57 @@
+﻿
+<h3>Netcode Blog</h3>
+
+@using MyBlogDemo.Shared;
+@inject MyBlogDemo.Client.Services.IBlogService blogService
+
+<div class="row">
+    @if (Posts != null)
+    {
+        foreach (var post in Posts)
+        {
+            <table class="table">
+                <thead></thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <img src="@post.Image" style="width:250px; height:250px; border:hidden" class="border-0" />
+                        </td>
+                        <td>
+                            <p>
+                                <span class="h4 text-primary fw-bold">@post.Title</span> <br />
+                                <span class="text-end" style="text-align:right"><i>Posted on: @post.DateCreated.ToString("d")</i></span>
+                            </p>
+                            <span class="text-muted">@post.Description</span><br />
+                            <span class="text-start mt-1">
+                                <b>Author</b> <i>@post.Author</i>
+                            </span>
+                            <div class="mt-2">
+                                <a href="/postblog/@post.Url" class="btn btn-primary float-end"> Read More...</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        }
+    }
+    else
+    {
+        <div class="badge text-center">Please Wait...</div>
+    }
+</div>
+
+
+@code {
+    private IEnumerable<BlogPost> Posts;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Posts = (await blogService.GetAllBlogPosts()).ToList();
+    }
+
+    //protected  override async Task OnInitializedAsync()
+    //{
+    //    Posts = (await blogService.GetAllBlogPosts()).ToList();
+
+    //}
+}
